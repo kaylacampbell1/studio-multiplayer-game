@@ -1,12 +1,13 @@
 import GameComponent from "../../GameComponent.js";
 import React from "react";
 import { GamePage } from "./GamePage.js";
+import UserApi from "../../UserApi.js";
 
 export default class HomePage extends GameComponent {
   constructor(props) {
     super(props);
     this.state = {
-      gamePage: "play",
+      gamePage: "home",
       word: "applesauce",
       scrambledWord: "ecapesplau",
       player: {
@@ -24,6 +25,11 @@ export default class HomePage extends GameComponent {
   }
 
   render() {
+    // ['player1', 'player2', 'player3']
+    let players = this.getSessionUserIds().map(user_id => (
+      <li key={user_id}>{UserApi.getName(user_id)}</li>
+    ));
+
     if (this.state.gamePage === "play") {
       return (
         <GamePage
@@ -36,7 +42,24 @@ export default class HomePage extends GameComponent {
         />
       );
     } else {
-      return <div>Welcome to Unscrambled!</div>;
+      return (
+        <div>
+          <h1>Welcome to Unscrambled!</h1>
+          <ul>{players}</ul>
+          <button
+            onClick={() => {
+              if (players.length >= 1) {
+                this.setState({ gamePage: "play" });
+                alert("you can play!");
+              } else if (players.length > 10) {
+                alert("too many players!");
+              }
+            }}
+          >
+            Let's Go!
+          </button>
+        </div>
+      );
     }
   }
 }
