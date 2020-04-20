@@ -13,7 +13,7 @@ import TwentyOneQuestions from "./games/twentyOneQuestions/TwentyOneQuestions.js
 import burst_Forth from "./games/Burst_Forth/burstForth.js";
 import fight from "./games/fight/fight.js";
 import uno from "./games/uno/uno.js";
-import Unscrambled from "./games/unscrambled/GamePage.js";
+import Unscrambled from "./games/unscrambled/HomePage.js";
 
 const gameData = {
   chatroom: {
