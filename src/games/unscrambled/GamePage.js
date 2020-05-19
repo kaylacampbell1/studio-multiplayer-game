@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { GuessedWords } from "./GuessedWords.js";
+import { isDone } from "./Objects.js";
 
 export default class GamePage extends Component {
   readInput() {
@@ -9,10 +10,8 @@ export default class GamePage extends Component {
     textArea.value = "";
   }
 
-  shouldButtonBeDisabled() {
-    return (
-      this.props.player.guessedWords.length > 3 || this.props.player.roundWon
-    );
+  getGuessedWords() {
+    return this.props.player.guessedWords ? this.props.player.guessedWords : [];
   }
 
   render() {
@@ -26,18 +25,16 @@ export default class GamePage extends Component {
           <textarea rows="1" type="text" id="guesses" />
           <button
             onClick={() => this.readInput()}
-            disabled={this.shouldButtonBeDisabled()}
+            disabled={isDone(this.props.player)}
           >
             Submit
           </button>
           <br />
           <br />
-          <div id="tries">
-            Tries Left: {4 - this.props.player.guessedWords.length}
-          </div>
+          <div id="tries">Tries Left: {4 - this.getGuessedWords().length}</div>
           <div id="points">Points: {this.props.player.points}</div>
           <GuessedWords
-            wordList={this.props.player.guessedWords}
+            wordList={this.getGuessedWords()}
             guessedRight={this.props.player.roundWon}
           />
         </div>
