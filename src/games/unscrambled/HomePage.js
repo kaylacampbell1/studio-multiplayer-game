@@ -7,7 +7,8 @@ import {
   guessWord,
   restartRound,
   getPlayer,
-  allPlayersDone
+  allPlayersDone,
+  wordList
 } from "./Objects.js";
 
 export default class HomePage extends GameComponent {
@@ -22,7 +23,7 @@ export default class HomePage extends GameComponent {
       playerList: createNewPlayerList([this.getMyUserId()])
     };
 
-    this.getSessionDatabaseRef().set({});
+    // this.getSessionDatabaseRef().set({});
     this.guessWord_ = this.guessWord_.bind(this);
   }
 
@@ -38,7 +39,7 @@ export default class HomePage extends GameComponent {
 
   letsGoClick() {
     let playerIds = this.getSessionUserIds();
-    if (playerIds.length > 1) {
+    if (playerIds.length > 0) {
       let players = createNewPlayerList(playerIds);
 
       let state = this.state;
@@ -50,7 +51,8 @@ export default class HomePage extends GameComponent {
         timeLimit: state.timeLimit,
         playerList: players
       };
-      this.getSessionDatabaseRef().update(newData);
+      this.setState(newData);
+      // this.getSessionDatabaseRef().update(newData);
     } else if (playerIds.length > 10) {
       alert("too many players!");
     }
@@ -82,11 +84,21 @@ export default class HomePage extends GameComponent {
   }
 
   getNewWord() {
-    return "purple";
+    let numWord = wordList.length;
+    let i = Math.round(Math.random() * numWord);
+    return wordList[i];
   }
 
   scrambleWord(word) {
-    return "purpel";
+    let wordAsArray = word.split("");
+    let newWord = [];
+
+    while (wordAsArray.length > 0) {
+      let wordLength = wordAsArray.length;
+      let i = Math.round(Math.random() * wordLength);
+      newWord = newWord.concat(wordAsArray.splice(i, 1));
+    }
+    return newWord.join("");
   }
 
   render() {
