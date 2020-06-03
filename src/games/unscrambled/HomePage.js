@@ -3,12 +3,14 @@ import React from "react";
 import { GamePage } from "./GamePage.js";
 import UserApi from "../../UserApi.js";
 import {
+  createNewPlayer,
   createNewPlayerList,
   guessWord,
   restartRound,
   getPlayer,
   allPlayersDone,
-  wordList
+  wordList,
+  reconcilePlayerList
 } from "./Objects.js";
 
 export default class HomePage extends GameComponent {
@@ -23,17 +25,25 @@ export default class HomePage extends GameComponent {
       playerList: createNewPlayerList([this.getMyUserId()])
     };
 
-    // this.getSessionDatabaseRef().set({});
     this.guessWord_ = this.guessWord_.bind(this);
   }
 
   guessWord_(word) {
     let playerList = this.state.playerList;
     let playerObj = getPlayer(this.getMyUserId(), playerList);
+    let updatedInfo = this.state;
     if (playerObj) {
       guessWord(word, this.state.word, playerObj);
-
-      this.getSessionDatabaseRef().update(this.state);
+      // Check if everyone is done, if so, generate a new word.
+      if (playerList && allPlayersDone(playerList)) {
+        let newWord = this.getNewWord();
+        let newScrambledWord = this.scrambleWord(newWord);
+        let updatedPlayers = restartRound(playerList);
+        updatedInfo.word = newWord;
+        updatedInfo.scrambledWord = newScrambledWord;
+        updatedInfo.playerList = updatedPlayers;
+      }
+      this.getSessionDatabaseRef().update(updatedInfo);
     }
   }
 
@@ -52,26 +62,33 @@ export default class HomePage extends GameComponent {
         playerList: players
       };
       this.setState(newData);
-      // this.getSessionDatabaseRef().update(newData);
     } else if (playerIds.length > 10) {
       alert("too many players!");
     }
   }
 
   onSessionDataChanged(data) {
-    // check if we need a new round
+    let currentPlayer = this.state.playerList
+      ? getPlayer(this.getMyUserId(), this.state.playerList)
+      : null;
+    let playerList = this.state.playerList;
+
+    // If current player isn't in the playerList, add them.
+    if (!currentPlayer) {
+      currentPlayer = createNewPlayer(this.getMyUserId());
+      playerList.push(currentPlayer);
+    }
+
+    // Reconcile the player list if someone new joined after the game started.
     let updatedPlayers = data.playerList
-      ? data.playerList
-      : this.state.playerList;
+      ? reconcilePlayerList(data.playerList, playerList)
+      : playerList;
+
+    // Check what data was updated from firbase
     let newWord = data.word ? data.word : this.state.word;
     let newScrambledWord = data.scrambledWord
       ? data.scrambledWord
       : this.state.scrambledWord;
-    if (data.playerList && allPlayersDone(data.playerList)) {
-      newWord = this.getNewWord();
-      newScrambledWord = this.scrambleWord(newWord);
-      updatedPlayers = restartRound(data.playerList);
-    }
 
     this.setState({
       gamePage: data.gamePage,

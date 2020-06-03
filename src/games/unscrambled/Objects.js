@@ -64,6 +64,30 @@ function allPlayersDone(playerList) {
   return playersDone;
 }
 
+function reconcilePlayerList(firebasePlayers, localPlayers) {
+  let playerIds = new Set();
+  for (let i = 0; i < firebasePlayers.length; i++) {
+    playerIds.add(firebasePlayers[i].playerId);
+  }
+
+  for (let i = 0; i < localPlayers.length; i++) {
+    playerIds.add(localPlayers[i].playerId);
+  }
+
+  let combinedPlayerList = [];
+  playerIds.forEach(id => {
+    let maybeFBPlayer = getPlayer(id, firebasePlayers);
+    let maybeLocalPlayer = getPlayer(id, localPlayers);
+    if (maybeFBPlayer) {
+      combinedPlayerList.push(maybeFBPlayer);
+    } else {
+      combinedPlayerList.push(maybeLocalPlayer);
+    }
+  });
+
+  return combinedPlayerList;
+}
+
 const wordList = [
   "aardvark",
   "albatross",
@@ -309,5 +333,6 @@ export {
   restartRound,
   getPlayer,
   allPlayersDone,
-  wordList
+  wordList,
+  reconcilePlayerList
 };
